@@ -5,6 +5,7 @@ cards = {"ace":4, 2:4, 3:4, 4:4, 5:4, 6:4, 7:4, 8:4, 9:4, 10:4, "jack":4, "queen
 player_hands = {}
 players_totals = {}
 dealer_hand = {}
+stand = {}
 def dealer_draws_at_start():
     dealer_hand = (
         (random.choice(list(cards.keys()))),
@@ -69,13 +70,14 @@ def turn(players, player):
                 for card in player_hands[player]:
                     if card == "king" or card == "queen" or card == "jack":
                         total += 10
-                    else:
-                        total += int(card)
-                    if card == "ace":
+
+                    elif card == "ace":
                         if total + 11 > 21:
                             total += 1
                         else:
                             total += 11
+                    else:
+                        total += int(card)
                 print(f"Player {player+1} total: {total}")
                 if total > 21:
                     print(f"Player {player+1} busts!")
@@ -93,19 +95,22 @@ def turn(players, player):
 
         if bust:
             break
-        elif action == 'stand':
+        if action == 'stand':
             print(f"Player {player+1} stands with hand: {player_hands[player]}") 
+            stand[player] = True
             break
-        else:
-            print("Invalid action. Please enter 'hit' or 'stand'.")
-    return players
+        
+        print("Invalid action. Please enter 'hit' or 'stand'.")
+    return players, stand
         
 
 
 
 def players_turns(players):
     for player in range(players):
-        players = turn(players, player)
+        if stand.get(player):
+            continue
+        players = turn(players, player)[0]
     return players
 
 
@@ -114,23 +119,23 @@ def dealer_total():
         for card in dealer_hand:
             if card == "king" or card == "queen" or card == "jack":
                 total += 10
-            else:
-                total += card
-            if card == "ace":
+            elif card == "ace":
                 if total + 11 > 17 and total + 11 < 21:
                     total += 11
                 else:
                     total += 1
+            else:
+                total += card
         print(f"Dealer total: {total}")
         return total
 
-def dealers_turn():
+def dealers_turn(dealer_hand):
     print("Dealer's turn.")
     while dealer_total() < 17:
          new_card = random.choice(list(cards.keys()))
          if cards[new_card] <= 0:
              continue
-         dealer_hand += (new_card,)
+         dealer_hand[new_card] = ""
          cards[new_card] -= 1
          print(f"Dealer draws: {new_card}")
          print(f"Dealer's hand: {dealer_hand}")
@@ -138,11 +143,10 @@ def dealers_turn():
         print("Dealer busts! Players win!")
     else:
         print(f"Dealer stands with total: {dealer_total()}")
+    return dealer_total
 
 
-
-def compare():
-    dealer_total = dealer_total()
+def compare(dealer_total):
     for player in players_totals:
         if players_totals[player] > dealer_total:
             print(f"Player {player+1} wins!")
@@ -157,16 +161,21 @@ players = deal_cards_at_start()
 
 while True:
     print(f"Number of players remaining: {players}")
-    if players > 0:
+    if players > 0 and len(stand) < players:
         print("Starting players' turns.")
         players = players_turns(players)
+    elif players > 0 and len(stand) == players:
+        for player in stand:
+            if stand[player]:
+                print(f"Player {player+1} has chosen to stand.")
+        break
     else:
         print("All players have busted. Game over.")
         break
 
 if players > 0:
-    dealers_turn()
-    compare()
+    total = dealers_turn(dealer_hand)
+    compare(total)
 
 
     
