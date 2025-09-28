@@ -49,6 +49,45 @@ def deal_cards_at_start():
     return players
 
 
+
+def count_total(player_hands, player, players):
+    total = 0
+    for card in player_hands[player]:
+        if card == "king" or card == "queen" or card == "jack":
+            total += 10
+
+        elif card == "ace":
+            if total + 11 > 21:
+                total += 1
+            else:
+                total += 11
+        else:
+            total += int(card)
+    print(f"Player {player+1} total: {total}")
+    if total > 21:
+        print(f"Player {player+1} busts!")
+        #delete player from game
+        del(player_hands[player])
+        players-=1
+        print(f"Number of players remaining: {players}")
+        bust = True
+        return players, bust
+    else:
+        players_totals[player] = total
+        bust = False
+        return players, bust
+        
+
+
+
+
+
+
+
+
+
+
+
 def turn(players, player):
     bust = False
     print(f"Player {player+1}'s turn.")
@@ -66,28 +105,8 @@ def turn(players, player):
                 print(f"Updated hand: {player_hands[player]}")
                 #we need to check if the player busts here
                 
-                total = 0
-                for card in player_hands[player]:
-                    if card == "king" or card == "queen" or card == "jack":
-                        total += 10
 
-                    elif card == "ace":
-                        if total + 11 > 21:
-                            total += 1
-                        else:
-                            total += 11
-                    else:
-                        total += int(card)
-                print(f"Player {player+1} total: {total}")
-                if total > 21:
-                    print(f"Player {player+1} busts!")
-                    #delete player from game
-                    del(player_hands[player])
-                    players-=1
-                    print(f"Number of players remaining: {players}")
-                    bust = True
-                else:
-                    players_totals[player] = total
+                players, bust = count_total(player_hands, player, players)
 
 
                 print(f"Remaining cards: {cards}")
@@ -97,10 +116,11 @@ def turn(players, player):
             break
         if action == 'stand':
             print(f"Player {player+1} stands with hand: {player_hands[player]}") 
+            players, bust = count_total(player_hands, player, players)
             stand[player] = True
             break
-        
-        print("Invalid action. Please enter 'hit' or 'stand'.")
+        if(action != 'hit' and action != 'stand' and not bust):
+            print("Invalid action. Please enter 'hit' or 'stand'.")
     return players, stand
         
 
@@ -143,15 +163,18 @@ def dealers_turn(dealer_hand):
         print("Dealer busts! Players win!")
     else:
         print(f"Dealer stands with total: {dealer_total()}")
-    return dealer_total
+    return dealer_total()
 
 
-def compare(dealer_total):
+def compare(dealers_total, players_totals):
+    print("The compare function is running")
+    print(players_totals)
     for player in players_totals:
-        if players_totals[player] > dealer_total:
-            print(f"Player {player+1} wins!")
-        else:
+        print("Comparing player totals")
+        if players_totals[player] < dealers_total and dealers_total <= 21:
             print(f"Player {player+1} loses!")
+        else:
+            print(f"Player {player+1} wins!")
       
 
 
@@ -160,6 +183,7 @@ def compare(dealer_total):
 players = deal_cards_at_start()
 
 while True:
+    dealer_won = False
     print(f"Number of players remaining: {players}")
     if players > 0 and len(stand) < players:
         print("Starting players' turns.")
@@ -171,11 +195,12 @@ while True:
         break
     else:
         print("All players have busted. Game over.")
+        dealer_won = True
         break
 
-if players > 0:
-    total = dealers_turn(dealer_hand)
-    compare(total)
+if players > 0 and dealer_won == False:
+    dealers_total = dealers_turn(dealer_hand)
+    compare(dealers_total, players_totals)
 
 
     
