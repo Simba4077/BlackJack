@@ -5,7 +5,12 @@ cards = {"ace":4, 2:4, 3:4, 4:4, 5:4, 6:4, 7:4, 8:4, 9:4, 10:4, "jack":4, "queen
 player_hands = {}
 players_totals = {}
 dealer_hand = {}
+dealer_total = 500
 stand = {}
+money = {} #money each player has
+wagers = {} #not implemented yet
+
+
 def dealer_draws_at_start():
     dealer_hand = (
         (random.choice(list(cards.keys()))),
@@ -21,7 +26,7 @@ def dealer_draws_at_start():
 
 
 
-def deal_cards_at_start():
+def deal_cards_at_start(wagers):
     while True:
         try:
             players = int(input("Enter number of players (1-10): "))
@@ -32,7 +37,12 @@ def deal_cards_at_start():
         except ValueError:
             print("Invalid input. Please enter a number.")
             return players
-    
+    for player in range(players):
+        money[player] = 100 #each player starts with $100
+        print(f"Player {player+1} starts with ${money[player]}")
+    print(f"Dealer starts with ${dealer_total}")
+    wager(players, wagers)
+
     for i in range(players):
         player_hands[i] = (
             random.choice(list(cards.keys())),
@@ -46,7 +56,7 @@ def deal_cards_at_start():
         print(f"Remaining cards: {cards}")
     
     dealer_draws_at_start()
-    return players
+    return players, wagers
 
 
 
@@ -80,14 +90,6 @@ def count_total(player_hands, player, players):
 
 
 
-
-
-
-
-
-
-
-
 def turn(players, player):
     bust = False
     print(f"Player {player+1}'s turn.")
@@ -113,6 +115,8 @@ def turn(players, player):
                 break
 
         if bust:
+            money[player] -= wagers[player]
+            print(f"Player {player+1} now has ${money[player]}")
             break
         if action == 'stand':
             print(f"Player {player+1} stands with hand: {player_hands[player]}") 
@@ -173,14 +177,38 @@ def compare(dealers_total, players_totals):
         print("Comparing player totals")
         if players_totals[player] < dealers_total and dealers_total <= 21:
             print(f"Player {player+1} loses!")
+            money[player] -= wagers[player]
+            dealer_total+=wagers[player]
+            print(f"Player {player+1} now has ${money[player]}")
+            print(f"Dealer now has ${dealer_total}")
         else:
             print(f"Player {player+1} wins!")
+            money[player] += wagers[player]
+            dealer_total-=wagers[player]
+            print(f"Player {player+1} now has ${money[player]}")
+            print(f"Dealer now has ${dealer_total}")
       
+
+
+def wager(players, wagers):
+    for player in range(players):
+        while True:
+            try:
+                wager = int(input(f"Player {player+1}, enter your wager: "))
+                wagers[player] = wager
+                if wager > 0:
+                    break
+                else:
+                    print("Wager must be a positive amount.")
+            except ValueError:
+                print("Invalid input. Please enter a number.")
+    return wagers
 
 
 
 # start the game
-players = deal_cards_at_start()
+
+players,wagers = deal_cards_at_start(wagers)
 
 while True:
     dealer_won = False
