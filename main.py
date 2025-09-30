@@ -5,7 +5,7 @@ cards = {"ace":4, 2:4, 3:4, 4:4, 5:4, 6:4, 7:4, 8:4, 9:4, 10:4, "jack":4, "queen
 player_hands = {}
 players_totals = {}
 dealer_hand = {}
-dealer_total = 500
+dtotal = 500
 stand = {}
 money = {} #money each player has
 wagers = {} #not implemented yet
@@ -26,7 +26,7 @@ def dealer_draws_at_start():
 
 
 
-def deal_cards_at_start(wagers):
+def deal_cards_at_start(wagers, dtotal):
     while True:
         try:
             players = int(input("Enter number of players (1-10): "))
@@ -40,7 +40,7 @@ def deal_cards_at_start(wagers):
     for player in range(players):
         money[player] = 100 #each player starts with $100
         print(f"Player {player+1} starts with ${money[player]}")
-    print(f"Dealer starts with ${dealer_total}")
+    print(f"Dealer starts with ${dtotal}")
     wager(players, wagers)
 
     for i in range(players):
@@ -170,7 +170,7 @@ def dealers_turn(dealer_hand):
     return dealer_total()
 
 
-def compare(dealers_total, players_totals):
+def compare(dealers_total, players_totals, dtotal):
     print("The compare function is running")
     print(players_totals)
     for player in players_totals:
@@ -178,15 +178,15 @@ def compare(dealers_total, players_totals):
         if players_totals[player] < dealers_total and dealers_total <= 21:
             print(f"Player {player+1} loses!")
             money[player] -= wagers[player]
-            dealer_total+=wagers[player]
+            dtotal+=wagers[player]
             print(f"Player {player+1} now has ${money[player]}")
-            print(f"Dealer now has ${dealer_total}")
+            print(f"Dealer now has ${dtotal}")
         else:
             print(f"Player {player+1} wins!")
             money[player] += wagers[player]
-            dealer_total-=wagers[player]
+            dtotal-=wagers[player]
             print(f"Player {player+1} now has ${money[player]}")
-            print(f"Dealer now has ${dealer_total}")
+            print(f"Dealer now has ${dtotal}")
       
 
 
@@ -208,7 +208,7 @@ def wager(players, wagers):
 
 # start the game
 
-players,wagers = deal_cards_at_start(wagers)
+players,wagers = deal_cards_at_start(wagers, dtotal)
 
 while True:
     dealer_won = False
@@ -228,7 +228,7 @@ while True:
 
 if players > 0 and dealer_won == False:
     dealers_total = dealers_turn(dealer_hand)
-    compare(dealers_total, players_totals)
+    compare(dealers_total, players_totals, dtotal)
 
 
     
