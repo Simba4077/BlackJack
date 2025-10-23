@@ -1,4 +1,4 @@
-Blackjack (Python CLI)
+#  **Blackjack (Python CLI)**
 
-A simple command-line Blackjack game built in Python.
-Play against the dealer, place wagers, and try not to bust!
+A simple **command-line Blackjack game** built in **Python**.  
+Play against the **dealer**, place **wagers**, and try not to **bust**
